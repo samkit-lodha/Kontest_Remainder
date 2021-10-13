@@ -5,10 +5,9 @@ import android.app.NotificationManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,7 +15,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+
         createNotificationChannel()
+
+        val navController = findNavController(R.id.fragmentContainerView)
+        navController.addOnDestinationChangedListener { _, destination,_->
+            if(destination.id == R.id.splashFragment){
+                toolbar.visibility = View.GONE
+            }
+            else{
+                toolbar.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun createNotificationChannel() {

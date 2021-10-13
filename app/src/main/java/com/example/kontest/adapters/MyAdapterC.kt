@@ -59,7 +59,7 @@ class MyAdapterC(val context : Context, val image : Int,val sitesName:String) : 
         holder.alarmContest.setOnClickListener {
             if(holder.alarmContest.text == "Set Alarm"){
                 setShowTime(position)
-                holder.alarmContest.text = "Cancel"
+                holder.alarmContest.text = "Cancel Alarm"
             }else{
                 getCancelAlertWindow(position)
                 holder.alarmContest.text = "Set Alarm"
