@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_nav_graph"
+    app:startDestination="@id/sitesFragment">
+
+    <fragment
+        android:id="@+id/sitesFragment"
+        android:name="com.example.kontest.SitesFragment"
+        android:label="Sites"
+        tools:layout="@layout/fragment_sites">
+        <action
+            android:id="@+id/action_sitesFragment_to_contestFragment"
+            app:destination="@id/contestFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/contestFragment"
+        android:label="{SitesNameSent}"
+        android:name="com.example.kontest.ContestFragment"
+        tools:layout="@layout/fragment_contest">
+        <action
+            android:id="@+id/action_contestFragment_to_webPageFragment"
+            app:destination="@id/webPageFragment"
+            app:popUpTo="@id/contestFragment"
+            app:popUpToInclusive="false" />
+        <argument
+            android:name="SitesNameSent"
+            app:argType="string" />
+        <argument
+            android:name="SitesImageSent"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_contestFragment_to_sitesFragment"
+            app:destination="@id/sitesFragment"
+            app:popUpTo="@id/sitesFragment"
+            app:popUpToInclusive="false" />
+        <argument
+            android:name="RequestCodeSent"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/webPageFragment"
+        android:name="com.example.kontest.WebPageFragment"
+        android:label="fragment_web_page"
+        tools:layout="@layout/fragment_web_page" >
+        <argument
+            android:name="urlSent"
+            app:argType="string" />
+        <argument
+            android:name="NameSent"
+            app:argType="string" />
+        <argument
+            android:name="ImageSent"
+            app:argType="integer" />
+        <argument
+            android:name="ResponseSent"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_webPageFragment_to_contestFragment"
+            app:destination="@id/contestFragment"
+            app:popUpTo="@id/sitesFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/alarmFragment"
+        android:name="com.example.kontest.AlarmFragment"
+        android:label="fragment_alarm"
+        tools:layout="@layout/fragment_alarm" />
+</navigation>
