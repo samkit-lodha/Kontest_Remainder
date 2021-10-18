@@ -46,6 +46,8 @@ class ContestFragment : Fragment() {
 
         binding = DataBindingUtil.inflate(inflater,R.layout.fragment_contest,container,false)
 
+        binding.marquee.isSelected = true
+
         args = ContestFragmentArgs.fromBundle(requireArguments())
 
         sitesName = args.sitesNameSent
