@@ -58,11 +58,66 @@ class MyAdapterC(val context : Context, val image : Int,val sitesName:String) : 
 
         holder.alarmContest.setOnClickListener {
             if(holder.alarmContest.text == "Set Alarm"){
-                setShowTime(position)
-                holder.alarmContest.text = "Cancel Alarm"
-            }else{
-                getCancelAlertWindow(position)
-                holder.alarmContest.text = "Set Alarm"
+                cal = Calendar.getInstance()
+                val timePickerDialog = TimePickerDialog.OnTimeSetListener { timepicker, hourOfDay, minute ->
+                    cal.set(Calendar.HOUR_OF_DAY,hourOfDay)
+                    cal.set(Calendar.MINUTE,minute)
+                    cal.set(Calendar.SECOND,0)
+                    cal.set(Calendar.MILLISECOND,0)
+
+                    val builder = AlertDialog.Builder(context)
+                    builder.setPositiveButton("Yes"){_,_ ->
+                        holder.alarmContest.text = "Cancel Alarm"
+                        alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+                        val i = Intent(context,AlarmReceiver::class.java)
+                        i.putExtra("SitesName",sitesName)
+                        i.putExtra("requestCode",position)
+
+                        pendingIntent = PendingIntent.getBroadcast(context,position,i,PendingIntent.FLAG_UPDATE_CURRENT)
+
+                        alarmManager.setExact(AlarmManager.RTC_WAKEUP,cal.timeInMillis,pendingIntent)
+
+                        Toast.makeText(context,"Alarm set successfully",Toast.LENGTH_LONG).show()
+                    }
+                    builder.setNegativeButton("No"){_,_ ->
+
+                    }
+
+                    builder.setTitle("Set Alarm")
+                    builder.setMessage("Are you sure you want to set the alarm for $sitesName contest?")
+
+                    builder.create().show()
+                }
+
+                TimePickerDialog(context,timePickerDialog,cal.get(Calendar.HOUR_OF_DAY),cal.get(Calendar.MINUTE),true).show()
+
+            }
+            else{
+                val builder = AlertDialog.Builder(context)
+                builder.setPositiveButton("Yes"){_,_ ->
+                    holder.alarmContest.text = "Set Alarm"
+                    val i = Intent(context,AlarmReceiver::class.java)
+                    i.putExtra("SitesName",sitesName)
+                    i.putExtra("requestCode",position)
+
+                    pendingIntent = PendingIntent.getBroadcast(context,position,i,PendingIntent.FLAG_UPDATE_CURRENT)
+
+                    if(alarmManager == null){
+                        alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    }
+
+                    alarmManager.cancel(pendingIntent)
+                    Toast.makeText(context,"Cancelled alarm!",Toast.LENGTH_LONG).show()
+                }
+                builder.setNegativeButton("No"){_,_ ->
+
+                }
+
+                builder.setTitle("Cancel Alarm")
+                builder.setMessage("Are you sure you want to cancel the alarm for $sitesName contest?")
+
+                builder.create().show()
             }
         }
     }
@@ -75,89 +130,39 @@ class MyAdapterC(val context : Context, val image : Int,val sitesName:String) : 
         notifyDataSetChanged()
     }
 
-
-    private fun setShowTime(position : Int){
-        cal = Calendar.getInstance()
-        val timePickerDialog = TimePickerDialog.OnTimeSetListener { timepicker, hourOfDay, minute ->
-            cal.set(Calendar.HOUR_OF_DAY,hourOfDay)
-            cal.set(Calendar.MINUTE,minute)
-            cal.set(Calendar.SECOND,0)
-            cal.set(Calendar.MILLISECOND,0)
-
-            getSetAlertWindow(position)
-        }
-
-        TimePickerDialog(context,timePickerDialog,cal.get(Calendar.HOUR_OF_DAY),cal.get(Calendar.MINUTE),true).show()
-    }
-
-    private fun getSetAlertWindow(position: Int){
-        val builder = AlertDialog.Builder(context)
-        builder.setPositiveButton("Yes"){_,_ ->
-            setAlarm(position)
-        }
-        builder.setNegativeButton("No"){_,_ ->
-
-        }
-
-        builder.setTitle("Set Alarm")
-        builder.setMessage("Are you sure you want to set the alarm for $sitesName contest?")
-
-        builder.create().show()
-    }
-
-    private fun getCancelAlertWindow(position: Int){
-        val builder = AlertDialog.Builder(context)
-        builder.setPositiveButton("Yes"){_,_ ->
-            cancelAlarm(position)
-        }
-        builder.setNegativeButton("No"){_,_ ->
-
-        }
-
-        builder.setTitle("Cancel Alarm")
-        builder.setMessage("Are you sure you want to cancel the alarm for $sitesName contest?")
-
-        builder.create().show()
-    }
-
-    private fun setAlarm(position: Int){
-        alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        val i = Intent(context,AlarmReceiver::class.java)
-        i.putExtra("SitesName",sitesName)
-        i.putExtra("requestCode",position)
-
-        pendingIntent = PendingIntent.getBroadcast(context,position,i,PendingIntent.FLAG_UPDATE_CURRENT)
-
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP,cal.timeInMillis,pendingIntent)
-
-        Toast.makeText(context,"Alarm set successfully",Toast.LENGTH_LONG).show()
-    }
-
-    private fun cancelAlarm(position: Int){
-        val i = Intent(context,AlarmReceiver::class.java)
-        i.putExtra("SitesName",sitesName)
-        i.putExtra("requestCode",position)
-
-        pendingIntent = PendingIntent.getBroadcast(context,position,i,PendingIntent.FLAG_UPDATE_CURRENT)
-
-        if(alarmManager == null){
-            alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        }
-
-        alarmManager.cancel(pendingIntent)
-        Toast.makeText(context,"Cancelled alarm!",Toast.LENGTH_LONG).show()
-    }
-
-
     private fun convertTime(str : String) : String {
-        val res = str.substring(11,16) + "  ( " + str.substring(0,10) + " )"
+        var hours : Int = str.substring(11,13).toInt()
+        var minutes : Int = str.substring(14,16).toInt()
+
+        hours+=5
+        minutes+=30
+
+        if(minutes>59){
+            minutes-=60
+            hours+=1
+        }
+
+        if(hours>23){
+            hours-=24
+        }
+
+        var res = ""
+        if(hours<10){
+            res+="0"
+        }
+        res+=hours.toString()
+        res+=" : "
+        if(minutes<10){
+            res+="0"
+        }
+        res+=minutes.toString()
+        res+=("  ( " + str.substring(0,10) + " )")
         return res
     }
 
     private fun millitotime(str : String) : String{
         val temp = str.toInt()
-        var res : String = "";
+        var res = ""
 
         if(temp/86400 !=0 ){
             res = res + (temp/86400).toString() + " Days "
@@ -169,6 +174,6 @@ class MyAdapterC(val context : Context, val image : Int,val sitesName:String) : 
             res = res + ((temp % 3600)/60).toString() + " Minutes "
         }
 
-        return res;
+        return res
     }
 }
