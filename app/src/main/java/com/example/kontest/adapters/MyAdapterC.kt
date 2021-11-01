@@ -161,7 +161,15 @@ class MyAdapterC(val context : Context, val image : Int,val sitesName:String) : 
     }
 
     private fun millitotime(str : String) : String{
-        val temp = str.toInt()
+        var end = 0
+        for( c in str){
+            if(c == '.'){
+                break
+            }
+            end++
+        }
+
+        val temp = str.substring(0,end).toInt()
         var res = ""
 
         if(temp/86400 !=0 ){
